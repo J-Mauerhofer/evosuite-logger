@@ -183,6 +183,11 @@ public abstract class AbstractMOSA extends GeneticAlgorithm<TestChromosome> {
                 this.calculateFitness(offspring2);
                 offspringPopulation.add(offspring2);
             }
+            String p1 = String.format("parent1: %d", parent1.hashCode());
+            String p2 = String.format("parent2: %d", parent2.hashCode());
+            String o1 = String.format("offspring1: %d", offspring1.hashCode());
+            String o2 = String.format("offspring2: %d", offspring2.hashCode());
+            LoggingUtils.getEvoLogger().info("crossover({}): {}, {}, {}, {}", currentIteration, p1, p2, o1, o2);
         }
         // Add new randomly generate tests
         for (int i = 0; i < Properties.POPULATION * Properties.P_TEST_INSERTION; i++) {
@@ -357,7 +362,14 @@ public abstract class AbstractMOSA extends GeneticAlgorithm<TestChromosome> {
 
         // Determine fitness
         this.calculateFitness();
-        this.notifyIteration();
+        //this.notifyIteration();
+
+        String currentPopulation ="";
+        for(TestChromosome tc : population) {
+            currentPopulation += String.format("\n%d: { fitness: %f, code:{\n%s\n\t}\n},", tc.hashCode(), tc.getFitness(), tc.toString());
+        }
+        LoggingUtils.getEvoLogger().info("\n Initial population: { {} }", currentPopulation);
+
     }
 
     /**

@@ -126,6 +126,12 @@ public class DynaMOSA extends AbstractMOSA {
             }
         }
 
+        String currentPopulation ="";
+        for(TestChromosome tc : population) {
+            currentPopulation += String.format("\n%d: { fitness: %f, code:{\n%s\n\t}\n},", tc.hashCode(), tc.getFitness(), tc.toString());
+        }
+        LoggingUtils.getEvoLogger().info("\nPopulation for iteration: {} { {} }",currentIteration, currentPopulation);
+
         this.currentIteration++;
         //logger.debug("N. fronts = {}", ranking.getNumberOfSubfronts());
         //logger.debug("1* front size = {}", ranking.getSubfront(0).size());
@@ -171,7 +177,18 @@ public class DynaMOSA extends AbstractMOSA {
         // search budget has been consumed.
         while (!isFinished() && this.goalsManager.getUncoveredGoals().size() > 0) {
             this.evolve();
-            this.notifyIteration();
+            String coveredgoals = String.format("\nGoals covered by iteration %d", this.currentIteration);
+            for(TestFitnessFunction tff: goalsManager.getCoveredGoals()) {
+                 coveredgoals = coveredgoals.concat("\t" + tff.toString() + ",\n");
+            }
+            String currentgoals = String.format("\nGoals in iteration %d\n", this.currentIteration);
+            for(TestFitnessFunction tff: goalsManager.getCurrentGoals()) {
+                currentgoals = currentgoals.concat("\t" + tff.toString() + ",\n");
+            }
+
+            LoggingUtils.getEvoLogger().info(coveredgoals);
+            LoggingUtils.getEvoLogger().info(currentgoals);
+            //this.notifyIteration();
         }
 
         this.notifySearchFinished();
