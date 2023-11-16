@@ -166,9 +166,12 @@ public abstract class AbstractMOSA extends GeneticAlgorithm<TestChromosome> {
             this.removeUnusedVariables(offspring1);
             this.removeUnusedVariables(offspring2);
 
+            String offspring1Mutated = "False";
+            String offspring2Mutated = "False";
             // apply mutation on offspring1
             this.mutate(offspring1, parent1);
             if (offspring1.isChanged()) {
+                offspring1Mutated = "True";
                 this.clearCachedResults(offspring1);
                 offspring1.updateAge(this.currentIteration);
                 this.calculateFitness(offspring1);
@@ -178,6 +181,7 @@ public abstract class AbstractMOSA extends GeneticAlgorithm<TestChromosome> {
             // apply mutation on offspring2
             this.mutate(offspring2, parent2);
             if (offspring2.isChanged()) {
+                offspring2Mutated = "True";
                 this.clearCachedResults(offspring2);
                 offspring2.updateAge(this.currentIteration);
                 this.calculateFitness(offspring2);
@@ -185,8 +189,8 @@ public abstract class AbstractMOSA extends GeneticAlgorithm<TestChromosome> {
             }
             String p1 = String.format("parent1: %d", parent1.hashCode());
             String p2 = String.format("parent2: %d", parent2.hashCode());
-            String o1 = String.format("offspring1: %d", offspring1.hashCode());
-            String o2 = String.format("offspring2: %d", offspring2.hashCode());
+            String o1 = String.format("offspring1: {id: %d, mutated: %s}", offspring1.hashCode(), offspring1Mutated);
+            String o2 = String.format("offspring2: {id: %d, mutated: %s}", offspring2.hashCode(), offspring2Mutated);
             LoggingUtils.getEvoLogger().info("crossover({}): {}, {}, {}, {}", currentIteration, p1, p2, o1, o2);
         }
         // Add new randomly generate tests

@@ -395,7 +395,7 @@ public class MultiCriteriaManager extends StructuralGoalManager implements Seria
         }
 
         Set<TestFitnessFunction> visitedTargets = new LinkedHashSet<>(getUncoveredGoals().size() * 2);
-
+        String goalsForChromosome = "\n";
         /*
          * The processing list of current targets. If it turns out that any such target has been
          * reached, we also enqueue its structural and control-dependent children. This is to
@@ -417,6 +417,7 @@ public class MultiCriteriaManager extends StructuralGoalManager implements Seria
                 continue;
 
             double fitness = target.getFitness(c);
+            goalsForChromosome = goalsForChromosome.concat(String.format("%f; %s\n", fitness, target.toString()));
 
             /*
              * Checks if the current test target has been reached and, in accordance, marks it as
@@ -442,6 +443,9 @@ public class MultiCriteriaManager extends StructuralGoalManager implements Seria
                 currentGoals.add(target); // marks the goal as uncovered
             }
         }
+        //chromosome: { id: %d, goals: %s, fitness: %f }
+
+        LoggingUtils.getEvoLogger().info(String.format("chromosome: { id: %d, goals: \n%s\n}\n", c.hashCode(), goalsForChromosome));
 
         // Removes all newly covered goals from the list of currently uncovered goals.
         currentGoals.removeAll(this.getCoveredGoals());
