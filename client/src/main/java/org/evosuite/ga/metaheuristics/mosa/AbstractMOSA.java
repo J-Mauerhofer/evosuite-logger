@@ -167,11 +167,12 @@ public abstract class AbstractMOSA extends GeneticAlgorithm<TestChromosome> {
             this.removeUnusedVariables(offspring2);
 
             String offspring1Mutated = "False";
+            int mutations1 = offspring1.getNumberOfMutations();
             String offspring2Mutated = "False";
+            int mutations2 = offspring2.getNumberOfMutations();
             // apply mutation on offspring1
             this.mutate(offspring1, parent1);
             if (offspring1.isChanged()) {
-                offspring1Mutated = "True";
                 this.clearCachedResults(offspring1);
                 offspring1.updateAge(this.currentIteration);
                 this.calculateFitness(offspring1);
@@ -181,12 +182,19 @@ public abstract class AbstractMOSA extends GeneticAlgorithm<TestChromosome> {
             // apply mutation on offspring2
             this.mutate(offspring2, parent2);
             if (offspring2.isChanged()) {
-                offspring2Mutated = "True";
                 this.clearCachedResults(offspring2);
                 offspring2.updateAge(this.currentIteration);
                 this.calculateFitness(offspring2);
                 offspringPopulation.add(offspring2);
             }
+            
+            if(mutations1 != offspring1.getNumberOfMutations()) {
+                offspring1Mutated = "True";
+            }
+            if(mutations2 != offspring2.getNumberOfMutations()) {
+                offspring1Mutated = "True";
+            }
+
             String p1 = String.format("parent1: %d", parent1.hashCode());
             String p2 = String.format("parent2: %d", parent2.hashCode());
             String o1 = String.format("offspring1: {id: %d, mutated: %s}", offspring1.hashCode(), offspring1Mutated);
