@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Implementation of the DynaMOSA (Many Objective Sorting Algorithm) described in the paper
@@ -132,7 +133,29 @@ public class DynaMOSA extends AbstractMOSA {
         }
         LoggingUtils.getEvoLogger().info("\nPopulation for iteration: {} { {} }",currentIteration, currentPopulation);
 
+    
+        StringBuilder goalsstr = new StringBuilder();
+        goalsstr.append(String.format("\nUncovered goals in iteration %d: %d", this.currentIteration, this.getNumberOfUncoveredGoals()));
+        goalsstr.append(String.format("\nCovered goals(%d) iteration %d\n", this.getNumberOfCoveredGoals(), this.currentIteration));
+        for(TestFitnessFunction tff: goalsManager.getCoveredGoals()) {
+             goalsstr.append(String.format("\t %s \n",  tff.toString()));
+        }
+        goalsstr.append(String.format("\nTarget goals(%d) iteration %d\n", this.goalsManager.getCurrentGoals().size(), this.currentIteration));
+        for(TestFitnessFunction tff: goalsManager.getCurrentGoals()) {
+            goalsstr.append(String.format("\t %s, \n", tff.toString()));
+        }
+
+        goalsstr.append(String.format("\nGoals for chromosomes in iteration %d: {\n", this.currentIteration));
+        for(TestChromosome tc : this.population) {
+            for(Map.Entry<FitnessFunction<TestChromosome>, Double> entry : tc.getFitnessValues().entrySet()) {
+                goalsstr.append(String.format("{ fitness: %f, goal: %s }\n", entry.getValue(), entry.getKey()));
+            }
+        }
+        goalsstr.append("}\n");
+        LoggingUtils.getEvoLogger().info(goalsstr.toString());
+
         this.currentIteration++;
+ 
         //logger.debug("N. fronts = {}", ranking.getNumberOfSubfronts());
         //logger.debug("1* front size = {}", ranking.getSubfront(0).size());
         logger.debug("Covered goals = {}", goalsManager.getCoveredGoals().size());
@@ -177,17 +200,7 @@ public class DynaMOSA extends AbstractMOSA {
         // search budget has been consumed.
         while (!isFinished() && this.goalsManager.getUncoveredGoals().size() > 0) {
             this.evolve();
-            String coveredgoals = String.format("\nGoals covered by iteration %d", this.currentIteration);
-            for(TestFitnessFunction tff: goalsManager.getCoveredGoals()) {
-                 coveredgoals = coveredgoals.concat("\t" + tff.toString() + ",\n");
-            }
-            String currentgoals = String.format("\nGoals in iteration %d\n", this.currentIteration);
-            for(TestFitnessFunction tff: goalsManager.getCurrentGoals()) {
-                currentgoals = currentgoals.concat("\t" + tff.toString() + ",\n");
-            }
 
-            LoggingUtils.getEvoLogger().info(coveredgoals);
-            LoggingUtils.getEvoLogger().info(currentgoals);
             //this.notifyIteration();
         }
 
