@@ -686,7 +686,10 @@ public abstract class GeneticAlgorithm<T extends Chromosome<T>> implements Searc
 
         if (Properties.ALGORITHM == Algorithm.NSGAII ||
                 Properties.ALGORITHM == Algorithm.SPEA2)
+        {
+            LoggingUtils.getEvoLogger().info("returning population..");
             return population;
+        }
 
         // Assume population is sorted
         bestIndividuals.add(population.get(0));

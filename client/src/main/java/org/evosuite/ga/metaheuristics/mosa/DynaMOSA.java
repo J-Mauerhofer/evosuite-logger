@@ -22,6 +22,7 @@ package org.evosuite.ga.metaheuristics.mosa;
 import org.evosuite.Properties;
 import org.evosuite.ga.ChromosomeFactory;
 import org.evosuite.ga.FitnessFunction;
+import org.evosuite.ga.archive.Archive;
 import org.evosuite.ga.comparators.OnlyCrowdingComparator;
 import org.evosuite.ga.metaheuristics.mosa.structural.MultiCriteriaManager;
 import org.evosuite.ga.operators.ranking.CrowdingDistance;
@@ -127,32 +128,49 @@ public class DynaMOSA extends AbstractMOSA {
             }
         }
 
-        String currentPopulation ="";
+        StringBuilder currentPopulation =new StringBuilder("\n\"population\": {");
+        currentPopulation.append(String.format("\"iteration\": %d, individuals: popStart[\n", this.currentIteration));
         for(TestChromosome tc : population) {
-            currentPopulation += String.format("\n%d: { fitness: %f, code:{\n%s\n\t}\n},", tc.hashCode(), tc.getFitness(), tc.toString());
+            currentPopulation.append(String.format("\n{ \"id\": %s, \"rank\": %d, \"fitness\": %f, \"distance\": %f, \"code\":{\n%s\n} },", tc.getID().toString(), tc.getRank(), tc.getFitness(), tc.getDistance(), tc.toString()));
         }
-        LoggingUtils.getEvoLogger().info("\nPopulation for iteration: {} { {} }",currentIteration, currentPopulation);
+        currentPopulation.deleteCharAt(currentPopulation.length()-1);
+        currentPopulation.append("\n]popEnd }");
+        LoggingUtils.getEvoLogger().info(currentPopulation.toString());
 
     
         StringBuilder goalsstr = new StringBuilder();
-        goalsstr.append(String.format("\nUncovered goals in iteration %d: %d", this.currentIteration, this.getNumberOfUncoveredGoals()));
-        goalsstr.append(String.format("\nCovered goals(%d) iteration %d\n", this.getNumberOfCoveredGoals(), this.currentIteration));
+        goalsstr.append(String.format("\n\"Goals\": { \"iteration\": %d, \"uncovered\": %d, \"covered\": %d, \"covered targets\": [\n", this.currentIteration, this.getNumberOfUncoveredGoals(), this.getNumberOfCoveredGoals()));
         for(TestFitnessFunction tff: goalsManager.getCoveredGoals()) {
-             goalsstr.append(String.format("\t %s \n",  tff.toString()));
+             goalsstr.append(String.format("\n\t \"%s\",",  tff.toString()));
         }
-        goalsstr.append(String.format("\nTarget goals(%d) iteration %d\n", this.goalsManager.getCurrentGoals().size(), this.currentIteration));
+        goalsstr.deleteCharAt(goalsstr.length()-1);
+        goalsstr.append("\n\t],\n\"current targets\": [\n");
         for(TestFitnessFunction tff: goalsManager.getCurrentGoals()) {
-            goalsstr.append(String.format("\t %s, \n", tff.toString()));
+            goalsstr.append(String.format("\n\t \"%s\",", tff.toString()));
         }
-
-        goalsstr.append(String.format("\nGoals for chromosomes in iteration %d: {\n", this.currentIteration));
+        goalsstr.deleteCharAt(goalsstr.length() -1);
+        goalsstr.append("] }\n");
+        goalsstr.append(String.format("\n\"Chromosome Goals\": { \"iteration\": %d, \"individuals\": [\n", this.currentIteration));
         for(TestChromosome tc : this.population) {
+            goalsstr.append(String.format("\n{ \"id\": \"%s\", \"goals\": [", tc.getID().toString()));
             for(Map.Entry<FitnessFunction<TestChromosome>, Double> entry : tc.getFitnessValues().entrySet()) {
-                goalsstr.append(String.format("{ fitness: %f, goal: %s }\n", entry.getValue(), entry.getKey()));
+                goalsstr.append(String.format("\n { \"fitness\": \"%f\", \"goal\": \"%s\" },", entry.getValue(), entry.getKey()));
             }
+            goalsstr.deleteCharAt(goalsstr.length() -1);
+            goalsstr.append("\n  ]\n},");
         }
-        goalsstr.append("}\n");
+        goalsstr.deleteCharAt(goalsstr.length() -1);
+        goalsstr.append("\n] }\n");
         LoggingUtils.getEvoLogger().info(goalsstr.toString());
+
+        StringBuilder archiveStr = new StringBuilder("\n\"Archive\": [");
+        for(TestChromosome tc : Archive.getArchiveInstance().getSolutions()) {
+            archiveStr.append(String.format("\n  \"%s\",", tc.getID().toString()));
+        }
+        archiveStr.deleteCharAt(archiveStr.length() -1);
+        archiveStr.append("\n]\n");
+
+        LoggingUtils.getEvoLogger().info(archiveStr.toString());
 
         this.currentIteration++;
  
@@ -201,7 +219,7 @@ public class DynaMOSA extends AbstractMOSA {
         while (!isFinished() && this.goalsManager.getUncoveredGoals().size() > 0) {
             this.evolve();
 
-            //this.notifyIteration();
+            this.notifyIteration();
         }
 
         this.notifySearchFinished();

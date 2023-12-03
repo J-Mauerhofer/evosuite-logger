@@ -140,6 +140,10 @@ public abstract class AbstractMOSA extends GeneticAlgorithm<TestChromosome> {
         List<TestChromosome> offspringPopulation = new ArrayList<>(Properties.POPULATION);
         // we apply only Properties.POPULATION/2 iterations since in each generation
         // we generate two offsprings
+        
+        StringBuilder str = new StringBuilder("\"Crossovers\": {");
+        str.append(String.format("\"iteration\": %d, \"crossovers\": [", this.currentIteration));
+
         for (int i = 0; i < Properties.POPULATION / 2 && !this.isFinished(); i++) {
             // select best individuals
 
@@ -166,9 +170,9 @@ public abstract class AbstractMOSA extends GeneticAlgorithm<TestChromosome> {
             this.removeUnusedVariables(offspring1);
             this.removeUnusedVariables(offspring2);
 
-            String offspring1Mutated = "False";
+            String offspring1Mutated = "false";
             int mutations1 = offspring1.getNumberOfMutations();
-            String offspring2Mutated = "False";
+            String offspring2Mutated = "false";
             int mutations2 = offspring2.getNumberOfMutations();
             // apply mutation on offspring1
             this.mutate(offspring1, parent1);
@@ -189,18 +193,23 @@ public abstract class AbstractMOSA extends GeneticAlgorithm<TestChromosome> {
             }
             
             if(mutations1 != offspring1.getNumberOfMutations()) {
-                offspring1Mutated = "True";
+                offspring1Mutated = "true";
             }
             if(mutations2 != offspring2.getNumberOfMutations()) {
-                offspring1Mutated = "True";
+                offspring1Mutated = "true";
             }
 
-            String p1 = String.format("parent1: %d", parent1.hashCode());
-            String p2 = String.format("parent2: %d", parent2.hashCode());
-            String o1 = String.format("offspring1: {id: %d, mutated: %s}", offspring1.hashCode(), offspring1Mutated);
-            String o2 = String.format("offspring2: {id: %d, mutated: %s}", offspring2.hashCode(), offspring2Mutated);
-            LoggingUtils.getEvoLogger().info("crossover({}): {}, {}, {}, {}", currentIteration, p1, p2, o1, o2);
+
+            str.append("\n{ ");
+            str.append(String.format("\"p1\": \"%s\",", parent1.getID().toString()));
+            str.append(String.format("\"p2\": \"%s\",", parent2.getID().toString()));
+            str.append(String.format("\"o1\": {\"id\": \"%s\", \"mutated\": %s},", offspring1.getID().toString(), offspring1Mutated));
+            str.append(String.format("\"o2\": {\"id\": \"%s\", \"mutated\": %s}", offspring2.getID().toString(), offspring2Mutated));
+            str.append("},");
         }
+        str.deleteCharAt(str.length()-1);
+        str.append("]}");
+        LoggingUtils.getEvoLogger().info(str.toString());
         // Add new randomly generate tests
         for (int i = 0; i < Properties.POPULATION * Properties.P_TEST_INSERTION; i++) {
             final TestChromosome tch;
@@ -376,11 +385,13 @@ public abstract class AbstractMOSA extends GeneticAlgorithm<TestChromosome> {
         this.calculateFitness();
         //this.notifyIteration();
 
-        String currentPopulation ="";
+        StringBuilder currentPopulation =new StringBuilder("\n \"Initial population\": popStart[");
         for(TestChromosome tc : population) {
-            currentPopulation += String.format("\n%d: { fitness: %f, code:{\n%s\n\t}\n},", tc.hashCode(), tc.getFitness(), tc.toString());
-        }
-        LoggingUtils.getEvoLogger().info("\n Initial population: { {} }", currentPopulation);
+            currentPopulation.append(String.format("\n{ \"id\": \"%s\", \"rank\": %d, \"fitness\": %f, \"distance\": %f, \"code\":{\n%s\n\t}\n},", tc.getID().toString(), tc.getRank(), tc.getFitness(), tc.getDistance(), tc.toString()));
+        } 
+        currentPopulation.deleteCharAt(currentPopulation.length()-1);
+        currentPopulation.append("\n]popEnd\n");
+        LoggingUtils.getEvoLogger().info(currentPopulation.toString());
 
     }
 

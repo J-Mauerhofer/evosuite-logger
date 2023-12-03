@@ -29,6 +29,7 @@ import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static java.util.stream.Collectors.averagingDouble;
 
@@ -92,6 +93,8 @@ public abstract class Chromosome<T extends Chromosome<T>>
      */
     private final LinkedHashMap<FitnessFunction<T>, Integer> numsCoveredGoals = new LinkedHashMap<>();
 
+    private final UUID id = UUID.randomUUID();
+
     // protected double coverage = 0.0;
 
     // protected int numOfCoveredGoals = 0;
@@ -130,6 +133,10 @@ public abstract class Chromosome<T extends Chromosome<T>>
     // may experience a change in its molecular structure. It is a record of the total number of collisions
     // a molecule has taken. (field used by Chemical Reaction Optimization algorithms)
     protected int numCollisions = 0;
+
+    public UUID getID() {
+        return this.id;
+    }
 
     /**
      * Return current fitness value

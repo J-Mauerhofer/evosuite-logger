@@ -19,6 +19,10 @@
  */
 package org.evosuite.strategy;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.lang.StringBuilder;
+
 import org.evosuite.ClientProcess;
 import org.evosuite.Properties;
 import org.evosuite.Properties.Criterion;
@@ -33,6 +37,7 @@ import org.evosuite.result.TestGenerationResultBuilder;
 import org.evosuite.rmi.ClientServices;
 import org.evosuite.rmi.service.ClientState;
 import org.evosuite.statistics.RuntimeVariable;
+import org.evosuite.testcase.TestChromosome;
 import org.evosuite.testcase.TestFitnessFunction;
 import org.evosuite.testcase.execution.ExecutionTracer;
 import org.evosuite.testcase.factories.RandomLengthTestFactory;
@@ -40,9 +45,6 @@ import org.evosuite.testsuite.TestSuiteChromosome;
 import org.evosuite.utils.ArrayUtil;
 import org.evosuite.utils.LoggingUtils;
 import org.evosuite.utils.Randomness;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Test generation with MOSA
@@ -138,6 +140,13 @@ public class MOSuiteStrategy extends TestGenerationStrategy {
                 testSuite.setCoverage(ff, 1.0);
             }
         }
+        StringBuilder str = new StringBuilder("\"Final Tests\": [");
+        for(TestChromosome tc: testSuite.getTestChromosomes()) {
+            str.append(String.format("\n  \"%s\",", tc.getID()));
+        }
+        str.deleteCharAt(str.length()-1);
+        str.append("\n]\n");
+        LoggingUtils.getEvoLogger().info(str.toString());
 
         long endTime = System.currentTimeMillis() / 1000;
 
