@@ -100,8 +100,38 @@ public class MultiCriteriaManager extends StructuralGoalManager implements Seria
     public MultiCriteriaManager(List<TestFitnessFunction> targets) {
         super(targets);
 
+        StringBuilder str = new StringBuilder();
+        str.append("\nGoals for MultiCriteriaManager: [");
+        targets.forEach((TestFitnessFunction function) -> {
+            str.append("\n\"");
+            str.append(function.toString());
+            str.append("\",");
+        });
+        str.deleteCharAt(str.length()-1);
+        str.append("\n]\n");
+
+        str.append("\nDependency Graph: { \"V\": [");
+
         // initialize the dependency graph among branches
         this.graph = getControlDependencies4Branches(targets);
+        this.graph.graph.vertexSet().forEach((TestFitnessFunction function) -> {
+            str.append("\n\"");
+            str.append(function.toString());
+            str.append("\",");
+        });
+        str.deleteCharAt(str.length() -1);
+        str.append("\n], \"E\": [");
+        this.graph.graph.edgeSet().forEach((DependencyEdge edge) -> {
+            str.append("\n\"");
+            str.append(edge.toString());
+            str.append("\",");
+        });
+        str.deleteCharAt(str.length()-1);
+        str.append("\n] }\n");
+
+        // str.append(this.graph.graph.toString()); -> this does not work
+
+        LoggingUtils.getEvoLogger().info(str.toString());
 
         // initialize the dependency graph between branches and other coverage targets (e.g., statements)
         // let's derive the dependency graph between branches and other coverage targets (e.g., statements)

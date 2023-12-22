@@ -170,9 +170,7 @@ public abstract class AbstractMOSA extends GeneticAlgorithm<TestChromosome> {
             this.removeUnusedVariables(offspring1);
             this.removeUnusedVariables(offspring2);
 
-            String offspring1Mutated = "false";
             int mutations1 = offspring1.getNumberOfMutations();
-            String offspring2Mutated = "false";
             int mutations2 = offspring2.getNumberOfMutations();
             // apply mutation on offspring1
             this.mutate(offspring1, parent1);
@@ -192,20 +190,9 @@ public abstract class AbstractMOSA extends GeneticAlgorithm<TestChromosome> {
                 offspringPopulation.add(offspring2);
             }
             
-            if(mutations1 != offspring1.getNumberOfMutations()) {
-                offspring1Mutated = "true";
-            }
-            if(mutations2 != offspring2.getNumberOfMutations()) {
-                offspring1Mutated = "true";
-            }
-
-
-            str.append("\n{ ");
-            str.append(String.format("\"p1\": \"%s\",", parent1.getID().toString()));
-            str.append(String.format("\"p2\": \"%s\",", parent2.getID().toString()));
-            str.append(String.format("\"o1\": {\"id\": \"%s\", \"mutated\": %s},", offspring1.getID().toString(), offspring1Mutated));
-            str.append(String.format("\"o2\": {\"id\": \"%s\", \"mutated\": %s}", offspring2.getID().toString(), offspring2Mutated));
-            str.append("},");
+            boolean m1 = mutations1 != offspring1.getNumberOfMutations();
+            boolean m2 = mutations2 != offspring2.getNumberOfMutations();
+            str.append(crossoverLogString(parent1, parent2, offspring1, offspring2, m1, m2));
         }
         str.deleteCharAt(str.length()-1);
         str.append("]}");
@@ -617,5 +604,35 @@ public abstract class AbstractMOSA extends GeneticAlgorithm<TestChromosome> {
 
     protected void applyLocalSearch(final TestSuiteChromosome testSuite) {
         adapter.applyLocalSearch(testSuite);
+    }
+
+    public String crossoverLogString(TestChromosome parent1, TestChromosome parent2, TestChromosome offspring1, TestChromosome offspring2, boolean mutated1, boolean mutated2){
+        StringBuilder str = new StringBuilder("\n{");
+        String m1 = mutated1 ? "true" : "false";
+        String m2 = mutated2 ? "true" : "false";
+
+        str.append("\n{ ");
+        str.append(String.format("\"p1\": \"%s\",", parent1.getID().toString()));
+        str.append(String.format("\"p2\": \"%s\",", parent2.getID().toString()));
+        str.append(String.format("\"o1\": {\"id\": \"%s\", \"mutated\": %s},", offspring1.getID().toString(), m1));
+        str.append(String.format("\"o2\": {\"id\": \"%s\", \"mutated\": %s}", offspring2.getID().toString(), m2));
+        str.append("},");
+        return "";
+    }
+
+    public String populationLogString(List<TestChromosome> population) {
+        StringBuilder str = new StringBuilder("popStart[\n");
+        for(TestChromosome tc: population) {
+            str.append(
+                String.format("\n{ \"id\": %s, \"rank\": %d, \"fitness\": %f, \"distance\": %f, \"code\":{\n%s\n} },",
+                tc.getID().toString(),
+                tc.getRank(),
+                tc.getFitness(),
+                tc.getDistance(),
+                tc.toString()));
+        }
+        str.deleteCharAt(str.length() -1);
+        str.append("\n]popEnd");
+        return str.toString();
     }
 }

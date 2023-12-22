@@ -78,6 +78,7 @@ public class DynaMOSA extends AbstractMOSA {
         union.addAll(this.population);
         union.addAll(offspringPopulation);
 
+
         // Ranking the union
         logger.debug("Union Size = {}", union.size());
 
@@ -90,6 +91,9 @@ public class DynaMOSA extends AbstractMOSA {
         int remain = Math.max(Properties.POPULATION, this.rankingFunction.getSubfront(0).size());
         int index = 0;
         this.population.clear();
+
+        // Log the offspring population
+        logPopulation("offspring population", offspringPopulation);
 
         // Obtain the first front
         List<TestChromosome> front = this.rankingFunction.getSubfront(index);
@@ -127,52 +131,6 @@ public class DynaMOSA extends AbstractMOSA {
                 this.population.add(front.get(k));
             }
         }
-
-        StringBuilder currentPopulation =new StringBuilder("\n\"population\": {");
-        currentPopulation.append(String.format("\"iteration\": %d, individuals: popStart[\n", this.currentIteration));
-        for(TestChromosome tc : population) {
-            currentPopulation.append(String.format("\n{ \"id\": %s, \"rank\": %d, \"fitness\": %f, \"distance\": %f, \"code\":{\n%s\n} },", tc.getID().toString(), tc.getRank(), tc.getFitness(), tc.getDistance(), tc.toString()));
-        }
-        currentPopulation.deleteCharAt(currentPopulation.length()-1);
-        currentPopulation.append("\n]popEnd }");
-        LoggingUtils.getEvoLogger().info(currentPopulation.toString());
-
-    
-        StringBuilder goalsstr = new StringBuilder();
-        goalsstr.append(String.format("\n\"Goals\": { \"iteration\": %d, \"uncovered\": %d, \"covered\": %d, \"covered targets\": [\n", this.currentIteration, this.getNumberOfUncoveredGoals(), this.getNumberOfCoveredGoals()));
-        for(TestFitnessFunction tff: goalsManager.getCoveredGoals()) {
-             goalsstr.append(String.format("\n\t \"%s\",",  tff.toString()));
-        }
-        goalsstr.deleteCharAt(goalsstr.length()-1);
-        goalsstr.append("\n\t],\n\"current targets\": [\n");
-        for(TestFitnessFunction tff: goalsManager.getCurrentGoals()) {
-            goalsstr.append(String.format("\n\t \"%s\",", tff.toString()));
-        }
-        goalsstr.deleteCharAt(goalsstr.length() -1);
-        goalsstr.append("] }\n");
-        goalsstr.append(String.format("\n\"Chromosome Goals\": { \"iteration\": %d, \"individuals\": [\n", this.currentIteration));
-        for(TestChromosome tc : this.population) {
-            goalsstr.append(String.format("\n{ \"id\": \"%s\", \"goals\": [", tc.getID().toString()));
-            for(Map.Entry<FitnessFunction<TestChromosome>, Double> entry : tc.getFitnessValues().entrySet()) {
-                goalsstr.append(String.format("\n { \"fitness\": \"%f\", \"goal\": \"%s\" },", entry.getValue(), entry.getKey()));
-            }
-            goalsstr.deleteCharAt(goalsstr.length() -1);
-            goalsstr.append("\n  ]\n},");
-        }
-        goalsstr.deleteCharAt(goalsstr.length() -1);
-        goalsstr.append("\n] }\n");
-        LoggingUtils.getEvoLogger().info(goalsstr.toString());
-
-        StringBuilder archiveStr = new StringBuilder("\n\"Archive\": [");
-        for(TestChromosome tc : Archive.getArchiveInstance().getSolutions()) {
-            archiveStr.append(String.format("\n  \"%s\",", tc.getID().toString()));
-        }
-        archiveStr.deleteCharAt(archiveStr.length() -1);
-        archiveStr.append("\n]\n");
-
-        LoggingUtils.getEvoLogger().info(archiveStr.toString());
-
-        this.currentIteration++;
  
         //logger.debug("N. fronts = {}", ranking.getNumberOfSubfronts());
         //logger.debug("1* front size = {}", ranking.getSubfront(0).size());
@@ -216,9 +174,12 @@ public class DynaMOSA extends AbstractMOSA {
 
         // Evolve the population generation by generation until all gaols have been covered or the
         // search budget has been consumed.
-        while (!isFinished() && this.goalsManager.getUncoveredGoals().size() > 0) {
+        //while (!isFinished() && this.goalsManager.getUncoveredGoals().size() > 0) {
+        for(int i = 0; i < 100; ++i){
             this.evolve();
+            logIteration();
 
+            this.currentIteration++;
             this.notifyIteration();
         }
 
@@ -245,5 +206,54 @@ public class DynaMOSA extends AbstractMOSA {
         List<TestFitnessFunction> testFitnessFunctions = new ArrayList<>(goalsManager.getCoveredGoals());
         testFitnessFunctions.addAll(goalsManager.getUncoveredGoals());
         return testFitnessFunctions;
+    }
+
+    public void logIteration() {
+        logPopulation("population", this.population);
+        logGoals();
+        logArchive();
+    }
+
+    public void logPopulation(String name, List<TestChromosome> population) {
+        StringBuilder currentPopulation =new StringBuilder(String.format("\n\"%s\": {", name));
+        currentPopulation.append(String.format("\"iteration\": %d, individuals: %s\n", this.currentIteration, populationLogString(population)));
+        currentPopulation.append(" }");
+        LoggingUtils.getEvoLogger().info(currentPopulation.toString());
+    }
+    public void logGoals() {
+        StringBuilder goalsstr = new StringBuilder();
+        goalsstr.append(String.format("\n\"Goals\": { \"iteration\": %d, \"uncovered\": %d, \"covered\": %d, \"covered targets\": [", this.currentIteration, this.getNumberOfUncoveredGoals(), this.getNumberOfCoveredGoals()));
+        for(TestFitnessFunction tff: this.goalsManager.getCoveredGoals()) {
+             goalsstr.append(String.format("\n\"%s\",",  tff.toString()));
+        }
+        goalsstr.deleteCharAt(goalsstr.length()-1);
+        goalsstr.append("\n],\n\"current targets\": [");
+        for(TestFitnessFunction tff: this.goalsManager.getCurrentGoals()) {
+            goalsstr.append(String.format("\n\"%s\",", tff.toString()));
+        }
+        goalsstr.deleteCharAt(goalsstr.length() -1);
+        goalsstr.append("\n] }\n");
+        goalsstr.append(String.format("\n\"Chromosome Goals\": { \"iteration\": %d, \"individuals\": [", this.currentIteration));
+        for(TestChromosome tc : this.population) {
+            goalsstr.append(String.format("\n{ \"id\": \"%s\", \"goals\": [", tc.getID().toString()));
+            for(Map.Entry<FitnessFunction<TestChromosome>, Double> entry : tc.getFitnessValues().entrySet()) {
+                goalsstr.append(String.format("\n { \"fitness\": \"%f\", \"goal\": \"%s\" },", entry.getValue(), entry.getKey()));
+            }
+            goalsstr.deleteCharAt(goalsstr.length() -1);
+            goalsstr.append("\n  ]\n},");
+        }
+        goalsstr.deleteCharAt(goalsstr.length() -1);
+        goalsstr.append("\n] }\n");
+        LoggingUtils.getEvoLogger().info(goalsstr.toString());
+    }
+    public void logArchive() {
+        StringBuilder archiveStr = new StringBuilder(String.format("\n\"Archive\": { iteration: %d, [", this.currentIteration));
+        for(TestChromosome tc : Archive.getArchiveInstance().getSolutions()) {
+            archiveStr.append(String.format("\n  \"%s\",", tc.getID().toString()));
+        }
+        archiveStr.deleteCharAt(archiveStr.length() -1);
+        archiveStr.append("\n] }\n");
+        LoggingUtils.getEvoLogger().info(archiveStr.toString());
+
     }
 }
