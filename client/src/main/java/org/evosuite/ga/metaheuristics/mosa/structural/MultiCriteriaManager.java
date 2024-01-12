@@ -120,7 +120,7 @@ public class MultiCriteriaManager extends StructuralGoalManager implements Seria
             str.append("\",");
         });
         str.deleteCharAt(str.length() -1);
-        str.append("\n], \"E\": [");
+        str.append("\n], \"E\": [ ");
         this.graph.graph.edgeSet().forEach((DependencyEdge edge) -> {
             str.append("\n\"");
             str.append(edge.toString());

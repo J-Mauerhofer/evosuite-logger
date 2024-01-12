@@ -617,7 +617,7 @@ public abstract class AbstractMOSA extends GeneticAlgorithm<TestChromosome> {
         str.append(String.format("\"o1\": {\"id\": \"%s\", \"mutated\": %s},", offspring1.getID().toString(), m1));
         str.append(String.format("\"o2\": {\"id\": \"%s\", \"mutated\": %s}", offspring2.getID().toString(), m2));
         str.append("},");
-        return "";
+        return str.toString();
     }
 
     public String populationLogString(List<TestChromosome> population) {
