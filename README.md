@@ -1,6 +1,8 @@
 # EvoSuite Logger
 The goal of this project is to log the internals of EvoSuite during its test generation using the DynaMOSA algorithm. 
 To reproduce the logging, the following command may be used:
+
+
 `
 java -jar path/to/evosuite_fork.jar -target "file_to_log" -Dshow_progress=false > log
 `
