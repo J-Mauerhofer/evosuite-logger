@@ -1,5 +1,9 @@
-[![Build Status](https://travis-ci.org/EvoSuite/evosuite.svg?branch=master)](https://travis-ci.org/EvoSuite/evosuite)
-[![CircleCI](https://circleci.com/gh/EvoSuite/evosuite.svg?style=svg&circle-token=f00c8d84b9dcf7dae4a82438441823f3be9df090)](https://circleci.com/gh/EvoSuite/evosuite)
+# EvoSuite Logger
+The goal of this project is to log the internals of EvoSuite during its test generation using the DynaMOSA algorithm. 
+To reproduce the logging, the following command may be used:
+`
+java -jar path/to/evosuite_fork.jar -target "file_to_log" -Dshow_progress=false > log
+`
 
 # What is EvoSuite?
 

@@ -175,7 +175,7 @@ public class DynaMOSA extends AbstractMOSA {
         // Evolve the population generation by generation until all gaols have been covered or the
         // search budget has been consumed.
         //while (!isFinished() && this.goalsManager.getUncoveredGoals().size() > 0) {
-        for(int i = 0; i < 100; ++i){
+        for(int i = 0; i < 500; ++i){
             this.evolve();
             logIteration();
 
