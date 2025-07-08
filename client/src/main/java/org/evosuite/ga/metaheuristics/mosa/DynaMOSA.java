@@ -194,7 +194,8 @@ public class DynaMOSA extends AbstractMOSA {
 
 
         //  HERE IT WOULD PROBABLY BE POSSIBLE TO LOG THE COVERAGE OF THE INITIAL POPULATION AND THE GOALS!!
-
+        logInitialGoals();
+        logInitialCoverage();
 
         // Evolve the population generation by generation until all gaols have been
         // covered or the
@@ -295,6 +296,8 @@ public class DynaMOSA extends AbstractMOSA {
         LoggingUtils.getEvoLogger().info(goalsstr.toString());
     }
 
+
+
     public void logArchive() {
         StringBuilder archiveStr = new StringBuilder(
                 String.format("\n\"Archive\": { iteration: %d, [", this.currentIteration));
@@ -319,5 +322,63 @@ public class DynaMOSA extends AbstractMOSA {
     }
 
 
+    /** Compute and print coverage for the *initial* population.      */
+    private void logInitialCoverage() {
 
+        // Build a synthetic TestSuiteChromosome from the current population
+        TestSuiteChromosome initialSuite = new TestSuiteChromosome();
+        initialSuite.addTestChromosomes(this.population);   // uses List<TestChromosome>
+
+        LoggingUtils.getEvoLogger().info(
+                "\n\"Coverage-Initial\": { \"phase\": \"initial-population\" }");
+
+        // Delegates heavy lifting (re-instrumentation & bit-strings) to EvoSuite
+        CoverageCriteriaAnalyzer.analyzeCoverage(initialSuite);
+    }
+
+
+    private void logInitialGoals() {
+
+        StringBuilder goalsstr = new StringBuilder();
+
+        /* --------- headline numbers --------- */
+        goalsstr.append(String.format(
+                "\n\"Goals\": { \"phase\": \"initial-population\", "
+                        + "\"uncovered\": %d, \"covered\": %d, ",
+                this.goalsManager.getUncoveredGoals().size(),
+                this.goalsManager.getCoveredGoals().size()));
+
+        /* --------- lists of targets --------- */
+        goalsstr.append("\"uncovered targets\": ");
+        appendGoals(goalsstr, this.goalsManager.getUncoveredGoals());
+
+        goalsstr.append("\n\"covered targets\": ");
+        appendGoals(goalsstr, this.goalsManager.getCoveredGoals());
+
+        goalsstr.append("\n\"current targets\": ");
+        appendGoals(goalsstr, this.goalsManager.getCurrentGoals());
+        goalsstr.deleteCharAt(goalsstr.length() - 1);     // trim final comma
+        goalsstr.append("}\n");
+
+        /* --------- per-chromosome goals --------- */
+        goalsstr.append("\n\"Chromosome Goals\": { \"phase\": \"initial-population\", \"individuals\": [");
+        for (TestChromosome tc : this.population) {
+            goalsstr.append(String.format(
+                    "\n{ \"id\": \"%s\", \"goals\": [", tc.getID()));
+
+            for (Map.Entry<FitnessFunction<TestChromosome>, Double> entry :
+                    tc.getFitnessValues().entrySet()) {
+
+                goalsstr.append(String.format(
+                        "\n { \"fitness\": \"%f\", \"goal\": \"%s\" },",
+                        entry.getValue(), entry.getKey()));
+            }
+            goalsstr.deleteCharAt(goalsstr.length() - 1); // last comma
+            goalsstr.append("\n  ]\n},");
+        }
+        goalsstr.deleteCharAt(goalsstr.length() - 1);     // final comma
+        goalsstr.append("\n] }\n");
+
+        LoggingUtils.getEvoLogger().info(goalsstr.toString());
+    }
 }
