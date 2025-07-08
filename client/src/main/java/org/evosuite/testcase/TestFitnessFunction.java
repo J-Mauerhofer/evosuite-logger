@@ -208,4 +208,13 @@ public abstract class TestFitnessFunction
     public abstract String getTargetClass();
 
     public abstract String getTargetMethod();
+
+    /**
+     * This method is used for the logging
+     * @return
+     */
+    public String getClassName() {
+        return this.getClass().getSimpleName();
+    }
+
 }

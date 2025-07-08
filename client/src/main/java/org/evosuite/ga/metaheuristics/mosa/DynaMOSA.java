@@ -20,6 +20,7 @@
 package org.evosuite.ga.metaheuristics.mosa;
 
 import org.evosuite.Properties;
+import org.evosuite.coverage.CoverageCriteriaAnalyzer;
 import org.evosuite.ga.ChromosomeFactory;
 import org.evosuite.ga.FitnessFunction;
 import org.evosuite.ga.archive.Archive;
@@ -28,6 +29,7 @@ import org.evosuite.ga.metaheuristics.mosa.structural.MultiCriteriaManager;
 import org.evosuite.ga.operators.ranking.CrowdingDistance;
 import org.evosuite.testcase.TestChromosome;
 import org.evosuite.testcase.TestFitnessFunction;
+import org.evosuite.testsuite.TestSuiteChromosome;
 import org.evosuite.utils.LoggingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -190,6 +192,10 @@ public class DynaMOSA extends AbstractMOSA {
                     this.goalsManager.getCurrentGoals());
         }
 
+
+        //  HERE IT WOULD PROBABLY BE POSSIBLE TO LOG THE COVERAGE OF THE INITIAL POPULATION AND THE GOALS!!
+
+
         // Evolve the population generation by generation until all gaols have been
         // covered or the
         // search budget has been consumed.
@@ -232,6 +238,7 @@ public class DynaMOSA extends AbstractMOSA {
         logPopulation("population", this.population);
         logGoals();
         logArchive();
+        logCoverage();
     }
 
     public void logPopulation(String name, List<TestChromosome> population) {
@@ -246,10 +253,12 @@ public class DynaMOSA extends AbstractMOSA {
         builder.append(" [\n");
         for (TestFitnessFunction tff : goals) {
             builder.append(String.format("\n\"%s\",", tff.toString()));
+            //builder.append(String.format("\nGoalName: \"%s\" GoalType: \"%s\",", tff.toString(), tff.getClassName()));
         }
         builder.deleteCharAt(builder.length() - 1);
         builder.append("\n],");
     }
+
 
     public void logGoals() {
         StringBuilder goalsstr = new StringBuilder();
@@ -297,4 +306,18 @@ public class DynaMOSA extends AbstractMOSA {
         LoggingUtils.getEvoLogger().info(archiveStr.toString());
 
     }
+
+    public void logCoverage(){
+        //obtain current archive
+        Set<TestChromosome> currentArchive = Archive.getArchiveInstance().getSolutions();
+        //create corresponding TestSuiteChromosome
+        TestSuiteChromosome testSuiteChromosome = new TestSuiteChromosome();
+        testSuiteChromosome.addTestChromosomes(currentArchive);
+
+        //call coverage analysis function
+        CoverageCriteriaAnalyzer.analyzeCoverage(testSuiteChromosome);
+    }
+
+
+
 }
