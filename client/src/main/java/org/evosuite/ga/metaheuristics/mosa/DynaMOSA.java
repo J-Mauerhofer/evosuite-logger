@@ -158,6 +158,9 @@ public class DynaMOSA extends AbstractMOSA {
      */
     @Override
     public void generateSolution() {
+
+        LoggingUtils.getEvoLogger().info("\n--- START OF SECTION BEFORE ITERATION 0 ---\n");
+
         logger.debug("executing generateSolution function");
 
         // Set up the targets to cover, which are initially free of any control
@@ -201,6 +204,9 @@ public class DynaMOSA extends AbstractMOSA {
         // covered or the
         // search budget has been consumed.
         // while (!isFinished() && this.goalsManager.getUncoveredGoals().size() > 0) {
+
+        LoggingUtils.getEvoLogger().info("\n--- END OF SECTION BEFORE ITERATION 0 ---\n");
+
         for (int i = 0; i < 500; ++i) {
             this.evolve();
             logIteration();
@@ -236,18 +242,29 @@ public class DynaMOSA extends AbstractMOSA {
     }
 
     public void logIteration() {
+        LoggingUtils.getEvoLogger().info("\n--- START OF ITERATION "+ this.currentIteration + " ---\n");
+
         logPopulation("population", this.population);
         logGoals();
         logArchive();
         logCoverage();
+
+        LoggingUtils.getEvoLogger().info("\n--- END OF ITERATION "+ this.currentIteration + " ---\n");
+
     }
 
     public void logPopulation(String name, List<TestChromosome> population) {
+
+        LoggingUtils.getEvoLogger().info("\n--- START OF POPULATION SECTION FOR ITERATION "+ this.currentIteration + " ---\n");
+
+
         StringBuilder currentPopulation = new StringBuilder(String.format("\n\"%s\": {", name));
         currentPopulation.append(String.format("\"iteration\": %d, individuals: %s\n", this.currentIteration,
                 populationLogString(population)));
         currentPopulation.append(" }");
         LoggingUtils.getEvoLogger().info(currentPopulation.toString());
+
+        LoggingUtils.getEvoLogger().info("\n--- END OF POPULATION SECTION FOR ITERATION "+ this.currentIteration + " ---\n");
     }
 
     private void appendGoals(StringBuilder builder, Set<TestFitnessFunction> goals) {
@@ -262,6 +279,10 @@ public class DynaMOSA extends AbstractMOSA {
 
 
     public void logGoals() {
+
+        LoggingUtils.getEvoLogger().info("\n--- START OF GOALS SECTION FOR ITERATION "+ this.currentIteration + " ---\n");
+
+
         StringBuilder goalsstr = new StringBuilder();
         goalsstr.append(String.format(
                 "\n\"Goals\": { \"iteration\": %d, \"uncovered\": %d, \"covered\": %d, ",
@@ -294,11 +315,18 @@ public class DynaMOSA extends AbstractMOSA {
         goalsstr.deleteCharAt(goalsstr.length() - 1);
         goalsstr.append("\n] }\n");
         LoggingUtils.getEvoLogger().info(goalsstr.toString());
+
+
+        LoggingUtils.getEvoLogger().info("\n--- END OF GOALS SECTION FOR ITERATION "+ this.currentIteration + " ---\n");
+
     }
 
 
 
     public void logArchive() {
+
+        LoggingUtils.getEvoLogger().info("\n--- START OF ARCHIVE SECTION FOR ITERATION "+ this.currentIteration + " ---\n");
+
         StringBuilder archiveStr = new StringBuilder(
                 String.format("\n\"Archive\": { iteration: %d, [", this.currentIteration));
         for (TestChromosome tc : Archive.getArchiveInstance().getSolutions()) {
@@ -308,9 +336,14 @@ public class DynaMOSA extends AbstractMOSA {
         archiveStr.append("\n] }\n");
         LoggingUtils.getEvoLogger().info(archiveStr.toString());
 
+        LoggingUtils.getEvoLogger().info("\n--- END OF ARCHIVE SECTION FOR ITERATION "+ this.currentIteration + " ---\n");
+
     }
 
     public void logCoverage(){
+
+        LoggingUtils.getEvoLogger().info("\n--- START OF COVERAGE SECTION FOR ITERATION "+ this.currentIteration + " ---\n");
+
         //obtain current archive
         Set<TestChromosome> currentArchive = Archive.getArchiveInstance().getSolutions();
         //create corresponding TestSuiteChromosome
@@ -319,25 +352,31 @@ public class DynaMOSA extends AbstractMOSA {
 
         //call coverage analysis function
         CoverageCriteriaAnalyzer.analyzeCoverage(testSuiteChromosome);
+
+        LoggingUtils.getEvoLogger().info("\n--- END OF COVERAGE SECTION FOR ITERATION "+ this.currentIteration + " ---\n");
+
     }
 
 
     /** Compute and print coverage for the *initial* population.      */
     private void logInitialCoverage() {
 
+        LoggingUtils.getEvoLogger().info("\n--- START OF INITIAL COVERAGE SECTION ---\n");
+
         // Build a synthetic TestSuiteChromosome from the current population
         TestSuiteChromosome initialSuite = new TestSuiteChromosome();
         initialSuite.addTestChromosomes(this.population);   // uses List<TestChromosome>
 
-        LoggingUtils.getEvoLogger().info(
-                "\n\"Coverage-Initial\": { \"phase\": \"initial-population\" }");
-
-        // Delegates heavy lifting (re-instrumentation & bit-strings) to EvoSuite
+        // Delegates heavy lifting to EvoSuite
         CoverageCriteriaAnalyzer.analyzeCoverage(initialSuite);
+
+        LoggingUtils.getEvoLogger().info("\n--- END OF INITIAL COVERAGE SECTION ---\n");
     }
 
 
     private void logInitialGoals() {
+
+        LoggingUtils.getEvoLogger().info("\n--- START OF INITIAL GOALS SECTION ---\n");
 
         StringBuilder goalsstr = new StringBuilder();
 
@@ -380,5 +419,7 @@ public class DynaMOSA extends AbstractMOSA {
         goalsstr.append("\n] }\n");
 
         LoggingUtils.getEvoLogger().info(goalsstr.toString());
+
+        LoggingUtils.getEvoLogger().info("\n--- END OF INITIAL GOALS SECTION ---\n");
     }
 }

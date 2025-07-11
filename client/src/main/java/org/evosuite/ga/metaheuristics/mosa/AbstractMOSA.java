@@ -140,7 +140,9 @@ public abstract class AbstractMOSA extends GeneticAlgorithm<TestChromosome> {
         List<TestChromosome> offspringPopulation = new ArrayList<>(Properties.POPULATION);
         // we apply only Properties.POPULATION/2 iterations since in each generation
         // we generate two offsprings
-        
+
+        LoggingUtils.getEvoLogger().info("\n--- START OF CROSSOVER SECTION FOR ITERATION "+ this.currentIteration + " ---\n");
+
         StringBuilder str = new StringBuilder("\"Crossovers\": {");
         str.append(String.format("\"iteration\": %d, \"crossovers\": [", this.currentIteration));
 
@@ -215,6 +217,9 @@ public abstract class AbstractMOSA extends GeneticAlgorithm<TestChromosome> {
             }
         }
         logger.info("Number of offsprings = {}", offspringPopulation.size());
+
+        LoggingUtils.getEvoLogger().info("\n--- END OF CROSSOVER SECTION FOR ITERATION "+ this.currentIteration + " ---\n");
+
         return offspringPopulation;
     }
 
@@ -372,6 +377,8 @@ public abstract class AbstractMOSA extends GeneticAlgorithm<TestChromosome> {
         this.calculateFitness();
         //this.notifyIteration();
 
+        LoggingUtils.getEvoLogger().info("\n--- START OF INITIAL POPULATION SECTION ---\n");
+
         StringBuilder currentPopulation =new StringBuilder("\n \"Initial population\": popStart[");
         for(TestChromosome tc : population) {
             currentPopulation.append(String.format("\n{ \"id\": \"%s\", \"rank\": %d, \"fitness\": %f, \"distance\": %f, \"code\":{\n%s\n\t}\n},", tc.getID().toString(), tc.getRank(), tc.getFitness(), tc.getDistance(), tc.toString()));
@@ -379,6 +386,8 @@ public abstract class AbstractMOSA extends GeneticAlgorithm<TestChromosome> {
         currentPopulation.deleteCharAt(currentPopulation.length()-1);
         currentPopulation.append("\n]popEnd\n");
         LoggingUtils.getEvoLogger().info(currentPopulation.toString());
+
+        LoggingUtils.getEvoLogger().info("\n--- END OF INITIAL POPULATION SECTION ---\n");
 
     }
 
