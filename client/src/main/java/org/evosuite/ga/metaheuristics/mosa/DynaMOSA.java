@@ -208,8 +208,12 @@ public class DynaMOSA extends AbstractMOSA {
         LoggingUtils.getEvoLogger().info("\n--- END OF SECTION BEFORE ITERATION 0 ---\n");
 
         for (int i = 0; i < 500; ++i) {
+            LoggingUtils.getEvoLogger().info("\n--- START OF ITERATION "+ this.currentIteration + " ---\n");
+
             this.evolve();
+
             logIteration();
+            LoggingUtils.getEvoLogger().info("\n--- END OF ITERATION "+ this.currentIteration + " ---\n");
 
             this.currentIteration++;
             this.notifyIteration();
@@ -242,20 +246,15 @@ public class DynaMOSA extends AbstractMOSA {
     }
 
     public void logIteration() {
-        LoggingUtils.getEvoLogger().info("\n--- START OF ITERATION "+ this.currentIteration + " ---\n");
-
         logPopulation("population", this.population);
         logGoals();
         logArchive();
         logCoverage();
-
-        LoggingUtils.getEvoLogger().info("\n--- END OF ITERATION "+ this.currentIteration + " ---\n");
-
     }
 
     public void logPopulation(String name, List<TestChromosome> population) {
 
-        LoggingUtils.getEvoLogger().info("\n--- START OF POPULATION SECTION FOR ITERATION "+ this.currentIteration + " ---\n");
+        LoggingUtils.getEvoLogger().info("\n--- START OF " + name.toUpperCase() + " SECTION FOR ITERATION" + this.currentIteration + " ---\n");
 
 
         StringBuilder currentPopulation = new StringBuilder(String.format("\n\"%s\": {", name));
@@ -264,7 +263,7 @@ public class DynaMOSA extends AbstractMOSA {
         currentPopulation.append(" }");
         LoggingUtils.getEvoLogger().info(currentPopulation.toString());
 
-        LoggingUtils.getEvoLogger().info("\n--- END OF POPULATION SECTION FOR ITERATION "+ this.currentIteration + " ---\n");
+        LoggingUtils.getEvoLogger().info("\n--- END OF " + name.toUpperCase() + "SECTION FOR ITERATION" + this.currentIteration + " ---\n");
     }
 
     private void appendGoals(StringBuilder builder, Set<TestFitnessFunction> goals) {
