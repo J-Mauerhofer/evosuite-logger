@@ -263,7 +263,7 @@ public class DynaMOSA extends AbstractMOSA {
         currentPopulation.append(" }");
         LoggingUtils.getEvoLogger().info(currentPopulation.toString());
 
-        LoggingUtils.getEvoLogger().info("\n--- END OF " + name.toUpperCase() + "SECTION FOR ITERATION" + this.currentIteration + " ---\n");
+        LoggingUtils.getEvoLogger().info("\n--- END OF " + name.toUpperCase() + " SECTION FOR ITERATION" + this.currentIteration + " ---\n");
     }
 
     private void appendGoals(StringBuilder builder, Set<TestFitnessFunction> goals) {
